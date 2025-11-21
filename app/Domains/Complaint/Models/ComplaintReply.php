@@ -11,7 +11,7 @@ class ComplaintReply extends Model
     protected $fillable = [
         'complaint_id',
         'user_id',
-        'message',
+        'reply',
         'is_from_staff',
     ];
 
