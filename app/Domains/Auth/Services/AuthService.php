@@ -25,7 +25,7 @@ class AuthService
     {
         $email = $data->email;
 
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findByEmailOrNull($email);
 
         if ($user) {
             $this->userRepository->update($data, $user);

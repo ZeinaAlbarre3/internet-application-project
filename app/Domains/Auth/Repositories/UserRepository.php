@@ -40,4 +40,10 @@ class UserRepository
         return User::query()->where('email', $email)->firstOrFail();
     }
 
+    public function findByEmailOrNull(string $email): ?User
+    {
+        return User::query()->where('email', $email)->first();
+    }
+
+
 }
