@@ -13,7 +13,7 @@ class Complaint extends Model
 
     protected $table = 'complaints';
 
-    protected $fillable = ['title', 'description', 'user_id','is_read', 'status','response'];
+    protected $fillable = ['title', 'description', 'user_id','is_read','reply', 'status','response'];
 
     public function user()
     {
