@@ -10,7 +10,7 @@ class ComplaintReplyResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'message' => $this->message,
+            'reply' => $this->reply,
             'is_from_staff' => $this->is_from_staff,
             'created_at' => $this->created_at
         ];
