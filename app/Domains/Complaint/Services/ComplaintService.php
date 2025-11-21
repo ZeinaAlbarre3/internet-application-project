@@ -36,7 +36,7 @@ class ComplaintService
 
         $this->complaintRepository->createReply($complaint, [
             'user_id'      => $user->id,
-            'message'      => $data->reply,
+            'reply'      => $data->reply,
             'is_from_staff'=> $user->hasRole('staff'),
         ]);
 
