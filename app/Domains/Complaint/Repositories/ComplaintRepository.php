@@ -3,8 +3,11 @@
 namespace App\Domains\Complaint\Repositories;
 
 use App\Domains\Complaint\Data\ChangeStatusData;
+use App\Domains\Complaint\Enum\ComplaintStatusEnum;
 use App\Domains\Complaint\Models\Complaint;
+use App\Exceptions\Types\CustomException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -50,4 +53,61 @@ class ComplaintRepository implements ComplaintRepositoryInterface
 
         return $complaint;
     }
+
+    public function assignToStaffAtomic(Complaint $complaint, int $staffId): bool
+    {
+        $updated = Complaint::where('id', $complaint->id)
+            ->whereNull('assigned_to')
+            ->update([
+                'assigned_to' => $staffId,
+                'status' => ComplaintStatusEnum::IN_PROGRESS->value,
+            ]);
+
+        return $updated > 0;
+    }
+
+    public function assignToStaffWithLock(Complaint $complaint, int $staffId, int $seconds = 10): bool
+    {
+        $lockKey = "complaint-assign-{$complaint->id}";
+
+        $lock = Cache::lock($lockKey, $seconds);
+
+        if (!$lock->get()) {
+            return false;
+        }
+
+        try {
+            $fresh = Complaint::find($complaint->id);
+            if ($fresh->assigned_to !== null) {
+                return false;
+            }
+
+            $fresh->assigned_to = $staffId;
+            $fresh->status = ComplaintStatusEnum::IN_PROGRESS->value;
+            $fresh->save();
+
+            return true;
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function updateStatusOptimistic(Complaint $complaint, ChangeStatusData $data): Complaint
+    {
+        $oldVersion = $data->version ?? ($complaint->version ?? 1);
+
+        $updated = Complaint::where('id', $complaint->id)
+            ->where('version', $oldVersion)
+            ->update([
+                'status' => $data->status->value,
+                'version' => $oldVersion + 1,
+            ]);
+
+        if ($updated === 0) {
+            throw new CustomException('Conflict: complaint was updated by someone else', 409);
+        }
+
+        return Complaint::find($complaint->id);
+    }
+
 }

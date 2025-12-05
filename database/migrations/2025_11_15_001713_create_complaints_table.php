@@ -16,10 +16,12 @@ return new class extends Migration
             $table->id();
             $table->string('reference_number')->unique()->nullable()->index();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete();
             $table->string('title');
             $table->text('description');
             $table->boolean('is_read')->default(false);
             $table->enum('status', array_column(ComplaintStatusEnum::cases(), 'value'))->default('open');
+            $table->unsignedInteger('version')->default(1)->index();
             $table->timestamps();
         });
     }

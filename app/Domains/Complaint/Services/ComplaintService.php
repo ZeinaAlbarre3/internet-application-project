@@ -67,4 +67,33 @@ class ComplaintService
         );
     }
 
+    public function assignToMe(Complaint $complaint): Complaint
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('staff')) {
+            throw new CustomException('Only staff can assign complaints', 403);
+        }
+
+        $assigned = $this->complaintRepository->assignToStaffAtomic($complaint, $user->id);
+
+        if ($assigned) {
+            return $complaint->refresh();
+        }
+
+        $assignedWithLock = $this->complaintRepository->assignToStaffWithLock($complaint, $user->id, 10);
+
+        if ($assignedWithLock) {
+            return $complaint->refresh();
+        }
+
+        throw new CustomException('Conflict: complaint already assigned', 409);
+    }
+
+    public function changeStatusOptimistic(Complaint $complaint, ChangeStatusData $data): Complaint
+    {
+        $complaint = $this->complaintRepository->updateStatusOptimistic($complaint, $data);
+
+        return $complaint->refresh()->load('replies');
+    }
+
 }
