@@ -47,7 +47,9 @@ class ComplaintRepository implements ComplaintRepositoryInterface
         $complaint->update([
             'status' => $data->status->value,
         ]);
-
+        
         return $complaint;
+
     }
+
 }
