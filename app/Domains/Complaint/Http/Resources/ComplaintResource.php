@@ -15,6 +15,8 @@ class ComplaintResource extends JsonResource
             'description' => $this->description,
             'is_read' => $this->is_read,
             'status' => $this->status,
+            'assigned_to' => $this->assigned_to,
+            'version' => $this->version,
             'replies' => ComplaintReplyResource::collection($this->whenLoaded('replies')),
             'created_at' => $this->created_at,
         ];

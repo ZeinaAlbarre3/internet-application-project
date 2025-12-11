@@ -13,11 +13,15 @@ class Complaint extends Model
 
     protected $table = 'complaints';
 
-    protected $fillable = ['title', 'description', 'user_id','is_read', 'status','response'];
+    protected $fillable = ['title', 'description', 'user_id','is_read', 'status','response' , 'assigned_to', 'version'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function assignee()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
     }
 
     public function replies(): HasMany

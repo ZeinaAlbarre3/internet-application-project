@@ -23,6 +23,7 @@ class ChangeComplaintStatusRequest extends FormRequest
     {
         return [
             'status' => [Rule::enum(ComplaintStatusEnum::class)],
+            'version' => ['required', 'integer', 'min:1'],
         ];
     }
 

@@ -16,6 +16,7 @@ interface ComplaintRepositoryInterface
     public function showCustomerComplaints(int $userId, $request);
     public function createReply(Complaint $complaint, array $attributes);
     public function updateStatus(Complaint $complaint, ChangeStatusData $data): Complaint;
-
+    public function assignToStaffAtomic(Complaint $complaint, int $staffId): bool;
+    public function assignToStaffWithLock(Complaint $complaint, int $staffId, int $seconds = 10): bool;
 
 }

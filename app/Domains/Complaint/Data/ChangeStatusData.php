@@ -8,6 +8,7 @@ use Spatie\LaravelData\Data;
 class ChangeStatusData extends Data
 {
     public function __construct(
-        public ?ComplaintStatusEnum $status
+        public ?ComplaintStatusEnum $status,
+        public int $version,
     ) {}
 }
