@@ -22,7 +22,7 @@ class PermissionSeeder extends Seeder
             'reply-complaint',
             'show-my-complaints',
             'change-status-complaint',
-
+            'assign-complaint'
         ];
 
         $totalPermissionsCount = count($permissions);

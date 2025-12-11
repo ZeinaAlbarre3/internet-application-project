@@ -70,10 +70,6 @@ class ComplaintService
     public function assignToMe(Complaint $complaint): Complaint
     {
         $user = Auth::user();
-        if (!$user->hasRole('staff')) {
-            throw new CustomException('Only staff can assign complaints', 403);
-        }
-
         $assigned = $this->complaintRepository->assignToStaffAtomic($complaint, $user->id);
 
         if ($assigned) {

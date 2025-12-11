@@ -40,6 +40,7 @@ class RolePermissionAssignerSeeder extends Seeder
                 'show-complaint-details',
                 'reply-complaint',
                 'change-status-complaint',
+                'assign-complaint',
             ]
         ];
 

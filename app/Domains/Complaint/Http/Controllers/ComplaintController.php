@@ -24,9 +24,7 @@ class ComplaintController extends Controller
     public function __construct(
         protected ComplaintRepositoryInterface $complaintRepository,
         protected ComplaintService $complaintService
-    )
-    {
-    }
+    ){}
 
     public function create(CreateComplaintRequest $request): JsonResponse
     {
@@ -79,35 +77,17 @@ class ComplaintController extends Controller
 
     public function assignToMe(Complaint $complaint): JsonResponse
     {
-        try {
-            $complaint = $this->complaintService->assignToMe($complaint);
+        $complaint = $this->complaintService->assignToMe($complaint);
 
-            return self::Success(
-                new ComplaintResource($complaint),
-                msg: 'Complaint assigned to you successfully'
-            );
-
-        } catch (\App\Exceptions\Types\CustomException $e) {
-
-            return self::Error(
-                data: null,
-                msg: $e->getMessage(),
-                code: $e->getCode() ?: 400
-            );
-        }
+        return self::Success(new ComplaintResource($complaint), msg: 'Complaint assigned to you successfully');
     }
 
     public function changeStatusOptimistic(ChangeComplaintStatusRequest $request, Complaint $complaint): JsonResponse
     {
         $data = ChangeStatusData::from($request->validated());
-        try {
-            $complaint = $this->complaintService->changeStatusOptimistic($complaint, $data);
-            return self::Success(new ComplaintResource($complaint), msg: 'Complaint status changed (optimistic)');
-        } catch (\App\Exceptions\Types\CustomException $e) {
-            return self::Error(null, $e->getMessage(), $e->getCode() ?: 409);
-        }
+
+        $complaint = $this->complaintService->changeStatusOptimistic($complaint, $data);
+
+        return self::Success(new ComplaintResource($complaint), msg: 'Complaint status changed (optimistic)');
     }
-
-
-
 }
