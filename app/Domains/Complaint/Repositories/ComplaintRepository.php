@@ -15,29 +15,44 @@ class ComplaintRepository implements ComplaintRepositoryInterface
 {
     public function create(array $attributes)
     {
-        return Complaint::create($attributes);
+        return Complaint::query()->create($attributes);
     }
 
     public function showAllComplaints($request): LengthAwarePaginator
     {
-        $complaints = Complaint::query()->latest();
+        $perPage = $request['per_page'] ?? 16;
+        $page    = $request->input('page', 1);
+        $cacheKey = "complaints:page:$page:per_page:$perPage";
 
-        return QueryBuilder::for($complaints , $request)
-            ->allowedFilters([
-                AllowedFilter::exact('status'),
-                AllowedFilter::exact('is_read')
-            ])
-            ->allowedSorts(['expected_cost', 'created_at', 'id'])
+        return Cache::tags(['complaints'])
+            ->remember($cacheKey, 300, function () use ($request, $perPage) {
 
-            ->paginate($request['per_page'] ?? 16);
+                $complaints = Complaint::query()->latest();
+
+                return QueryBuilder::for($complaints, $request)
+                    ->allowedFilters([
+                        AllowedFilter::exact('status'),
+                        AllowedFilter::exact('is_read'),
+                    ])
+                    ->allowedSorts(['expected_cost', 'created_at', 'id'])
+                    ->paginate($perPage);
+            });
     }
 
     public function showCustomerComplaints(int $userId, $request): LengthAwarePaginator
     {
-        return Complaint::query()
-            ->where('user_id', $userId)
-            ->latest()
-            ->paginate($request['per_page'] ?? 16);
+        $perPage = $request['per_page'] ?? 16;
+        $page    = $request->input('page', 1);
+
+        $cacheKey = "complaints:user:$userId:page:$page:per_page:$perPage";
+
+        return Cache::tags(['complaints', "user:$userId"])
+            ->remember($cacheKey, 300, function () use ($userId, $perPage) {
+                return Complaint::query()
+                    ->where('user_id', $userId)
+                    ->latest()
+                    ->paginate($perPage);
+            });
     }
 
     public function createReply(Complaint $complaint, array $attributes)
@@ -45,11 +60,11 @@ class ComplaintRepository implements ComplaintRepositoryInterface
         return $complaint->replies()->create($attributes);
     }
 
-    public function updateStatus(Complaint $complaint, ChangeStatusData $data): Complaint
+    public function markAsRead(Complaint $complaint): Complaint
     {
-        $complaint->update([
-            'status' => $data->status->value,
-        ]);
+        if (!$complaint->is_read) {
+            $complaint->update(['is_read' => true]);
+        }
 
         return $complaint;
     }

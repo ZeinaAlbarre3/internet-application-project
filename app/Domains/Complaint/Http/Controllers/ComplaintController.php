@@ -65,16 +65,6 @@ class ComplaintController extends Controller
         return self::Success(new ComplaintResource($complaint),msg: 'Complaint has been replied successfully');
     }
 
-    public function changeStatus(ChangeComplaintStatusRequest $request,Complaint $complaint): JsonResponse
-    {
-        $statusData = ChangeStatusData::from($request->validated());
-
-        $complaint = $this->complaintService->changeStatus($complaint, $statusData);
-
-        return self::Success(new ComplaintResource($complaint),msg: 'Complaint status has been changed successfully');
-
-    }
-
     public function assignToMe(Complaint $complaint): JsonResponse
     {
         $complaint = $this->complaintService->assignToMe($complaint);
