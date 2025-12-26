@@ -18,10 +18,11 @@ class ComplaintStatusChanged implements TraceableEvent,InvalidatesComplaintCache
     /**
      * Create a new event instance.
      */
-    public function __construct(Public Complaint $complaint)
-    {
-
-    }
+    public function __construct(
+        public Complaint $complaint,
+        public string $oldStatus,
+        public string $newStatus
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.
@@ -48,8 +49,9 @@ class ComplaintStatusChanged implements TraceableEvent,InvalidatesComplaintCache
     public function meta(): array
     {
         return [
-            'complaint_id' => $this->complaint->id,
-            'status'=> $this->complaint->status,
+            'complaint_reference' => $this->complaint->reference_nmber,
+            'old_status' => $this->oldStatus,
+            'new_status' => $this->newStatus,
         ];
     }
 

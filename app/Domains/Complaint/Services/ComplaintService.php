@@ -98,9 +98,11 @@ class ComplaintService
     {
         return DB::transaction(function () use ($complaint,$data) {
 
+            $oldStatus = $complaint->status;
+
             $complaint = $this->complaintRepository->updateStatusOptimistic($complaint, $data);
 
-            event(new ComplaintStatusChanged($complaint));
+            event(new ComplaintStatusChanged($complaint,$oldStatus,$complaint->status));
 
             return $complaint->refresh()->load('replies');
         });

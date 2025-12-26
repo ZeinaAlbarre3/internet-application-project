@@ -26,7 +26,7 @@ class ReportRepository implements ReportRepositoryInterface
             ->remember($cacheKey, 300, function () use ($request, $perPage) {
 
                 $query = Trace::query()
-                    ->with(['user:id,email'])
+                    ->with(['user:reference_number,email'])
                     ->latest('occurred_at');
 
                 return QueryBuilder::for($query, $request)

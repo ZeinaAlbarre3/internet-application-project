@@ -48,7 +48,7 @@ class ComplaintReplyCreated implements TraceableEvent,InvalidatesComplaintCache
     public function meta(): array
     {
         return [
-            'complaint_id' => $this->reply->complaint_id,
+            'complaint_reference' => $this->reply->reference_nmber,
             'is_from_staff'=> $this->reply->is_from_staff,
         ];
     }

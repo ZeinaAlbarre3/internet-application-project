@@ -13,16 +13,12 @@ class TraceResource extends JsonResource
             'action'           => $this->action,
             'status_code'      => $this->status_code,
             'user' => [
-                'id'    => $this->user_id,
+                'reference_number' => $this->user?->reference_number,
                 'email' => $this->user?->email,
             ],
             'route'            => $this->route,
             'method'           => $this->method,
             'ip'               => $this->ip,
-            'entity' => [
-                'type' => $this->entity_type,
-                'id'   => $this->entity_id,
-            ],
             'meta'             => $this->meta,
             'occurred_at'      => $this->occurred_at,
         ];
