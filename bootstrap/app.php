@@ -2,6 +2,8 @@
 
 use App\Domains\Auth\AuthServiceProvider;
 use App\Domains\Complaint\ComplaintServiceProvider;
+use App\Domains\Report\ReportServiceProvider;
+use App\Domains\Shared\Tracing\TraceServiceProvider;
 use App\Exceptions\ExceptionHandler;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,5 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         AuthServiceProvider::class,
         ComplaintServiceProvider::class,
+        TraceServiceProvider::class,
+        ReportServiceProvider::class,
     ])
     ->create([]);

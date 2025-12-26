@@ -4,6 +4,7 @@ namespace App\Domains\Auth\Services;
 
 
 use App\Domains\Auth\Actions\SendOtpAction;
+use App\Domains\Auth\Events\PasswordResetCompleted;
 use App\Domains\Auth\Repositories\UserRepository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -36,6 +37,7 @@ class PasswordResetService
         $user->save();
 
         Cache::forget($tokenCacheKey);
+        event(new PasswordResetCompleted($user));
         return $user->createToken('auth_token')->plainTextToken;
     }
 }

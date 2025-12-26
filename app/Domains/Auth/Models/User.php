@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Models;
 
 use App\Domains\Complaint\Models\Complaint;
+use App\Domains\Shared\Tracing\Models\Trace;
 use App\Traits\HasUniqueCode;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -61,6 +62,11 @@ class User extends Authenticatable
     protected static function newFactory()
     {
         return UserFactory::new();
+    }
+
+    public function traces(): HasMany
+    {
+        return $this->hasMany(Trace::class);
     }
 
     protected function getCodeColumn(): string

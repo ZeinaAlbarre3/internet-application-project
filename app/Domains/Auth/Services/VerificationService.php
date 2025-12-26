@@ -5,6 +5,7 @@ namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\Actions\SendOtpAction;
 use App\Domains\Auth\Enums\OtpActionTypeEnum;
+use App\Domains\Auth\Events\RegisterOtpVerified;
 use App\Domains\Auth\Http\Requests\ForgotPasswordRequest;
 use App\Domains\Auth\Models\User;
 use App\Domains\Auth\Repositories\UserRepository;
@@ -32,6 +33,8 @@ class VerificationService
         $user->forceFill([
             'email_verified_at' => now(),
         ])->save();
+
+        event(new RegisterOtpVerified($user));
 
         return $user;
     }

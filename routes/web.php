@@ -15,7 +15,7 @@ Route::get('/which', function () {
     ]);
 });
 Route::get('/login-test', function () {
-    session(['student' => 'Fatima']); // أي قيمة تجريبية
+    session(['student' => 'Fatima']);
     return response()->json(['status' => 'logged', 'instance' => env('APP_INSTANCE')]);
 });
 

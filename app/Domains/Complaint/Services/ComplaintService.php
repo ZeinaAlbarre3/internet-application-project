@@ -6,12 +6,16 @@ use App\Domains\Complaint\Data\ChangeStatusData;
 use App\Domains\Complaint\Data\CreateComplaintData;
 use App\Domains\Complaint\Data\ReplyComplaintData;
 use App\Domains\Complaint\Enum\ComplaintStatusEnum;
+use App\Domains\Complaint\Events\ComplaintCreated;
+use App\Domains\Complaint\Events\ComplaintReplyCreated;
+use App\Domains\Complaint\Events\ComplaintStatusChanged;
 use App\Domains\Complaint\Models\Complaint;
 use App\Domains\Complaint\Repositories\ComplaintRepositoryInterface;
 use App\Exceptions\Types\CustomException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ComplaintService
 {
@@ -23,25 +27,33 @@ class ComplaintService
 
     public function createComplaint(CreateComplaintData $data)
     {
-        Cache::tags(['complaints'])->flush();
+        return DB::transaction(function () use ($data) {
 
-        return $this->complaintRepository->create([
-            ...$data->toArray(),
-            'user_id' => Auth::id(),
-        ]);
+            $complaint = $this->complaintRepository->create([
+                ...$data->toArray(),
+                'user_id' => Auth::id(),
+            ]);
+
+            event(new ComplaintCreated($complaint));
+
+            return $complaint;
+        });
     }
 
     public function replyToComplaint(Complaint $complaint, ReplyComplaintData $data): Complaint
     {
-        $user = Auth::user();
+        return DB::transaction(function () use ($complaint,$data) {
 
-        if($complaint->status === ComplaintStatusEnum::CLOSED->value) throw new CustomException('The Complaint Closed you can not reply',422);
+            $user = Auth::user();
 
-        $this->complaintRepository->createReply($complaint, $data->toCreateArray($user));
+            if ($complaint->status === ComplaintStatusEnum::CLOSED->value) throw new CustomException('The Complaint Closed you can not reply', 422);
 
-        Cache::tags(['complaints'])->flush();
+            $complaintReply = $this->complaintRepository->createReply($complaint, $data->toCreateArray($user));
 
-        return $complaint->refresh()->load('replies');
+            event(new ComplaintReplyCreated($complaintReply));
+
+            return $complaint->refresh()->load('replies');
+        });
     }
 
     public function showComplaint(Complaint $complaint): Complaint
@@ -61,31 +73,37 @@ class ComplaintService
 
     public function assignToMe(Complaint $complaint): Complaint
     {
-        Cache::tags(['complaints'])->flush();
+        return DB::transaction(function () use ($complaint) {
 
-        $user = Auth::user();
-        $assigned = $this->complaintRepository->assignToStaffAtomic($complaint, $user->id);
+            Cache::tags(['complaints'])->flush();
 
-        if ($assigned) {
-            return $complaint->refresh();
-        }
+            $user = Auth::user();
+            $assigned = $this->complaintRepository->assignToStaffAtomic($complaint, $user->id);
 
-        $assignedWithLock = $this->complaintRepository->assignToStaffWithLock($complaint, $user->id, 10);
+            if ($assigned) {
+                return $complaint->refresh();
+            }
 
-        if ($assignedWithLock) {
-            return $complaint->refresh();
-        }
+            $assignedWithLock = $this->complaintRepository->assignToStaffWithLock($complaint, $user->id, 10);
 
-        throw new CustomException('Conflict: complaint already assigned', 409);
+            if ($assignedWithLock) {
+                return $complaint->refresh();
+            }
+
+            throw new CustomException('Conflict: complaint already assigned', 409);
+        });
     }
 
     public function changeStatusOptimistic(Complaint $complaint, ChangeStatusData $data): Complaint
     {
-        $complaint = $this->complaintRepository->updateStatusOptimistic($complaint, $data);
+        return DB::transaction(function () use ($complaint,$data) {
 
-        Cache::tags(['complaints'])->flush();
+            $complaint = $this->complaintRepository->updateStatusOptimistic($complaint, $data);
 
-        return $complaint->refresh()->load('replies');
+            event(new ComplaintStatusChanged($complaint));
+
+            return $complaint->refresh()->load('replies');
+        });
     }
 
 }

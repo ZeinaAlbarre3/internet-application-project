@@ -3,8 +3,10 @@
 namespace App\Domains\Complaint\Models;
 
 use App\Domains\Auth\Models\User;
+use App\Domains\Shared\Tracing\Models\Trace;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ComplaintReply extends Model
 {
@@ -23,5 +25,11 @@ class ComplaintReply extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function traces(): HasMany
+    {
+        return $this->hasMany(Trace::class, 'entity_id')
+            ->where('entity_type', 'ComplaintReply');
     }
 }

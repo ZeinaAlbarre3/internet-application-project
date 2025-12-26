@@ -2,6 +2,8 @@
 
 namespace App\Domains\Auth\Http\Requests;
 
+use App\Domains\Auth\Events\LoginFailed;
+use App\Domains\Auth\Events\LoginSucceeded;
 use App\Domains\Auth\Models\User;
 use Exception;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -40,6 +42,7 @@ class LoginRequest extends FormRequest
         $user = User::where('email', $this->validated()['email'])->first();
 
         if (!$user || !Hash::check($this->validated()['password'], $user->password) || $user->email_verified_at === null) {
+            event(new LoginFailed($user));
             throw  new BadRequestHttpException('failed');
         }
 
@@ -48,6 +51,7 @@ class LoginRequest extends FormRequest
                 'email' => [trans('auth.banned')],
             ]);
         }
+        event(new LoginSucceeded($user));
         return $user;
     }
 }

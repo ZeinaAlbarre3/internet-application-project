@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domains\Complaint;
+namespace App\Domains\Report;
 
 use App\Domains\Complaint\Events\ComplaintCreated;
 use App\Domains\Complaint\Events\ComplaintReplyCreated;
@@ -8,12 +8,14 @@ use App\Domains\Complaint\Events\ComplaintStatusChanged;
 use App\Domains\Complaint\Listeners\InvalidateComplaintCacheListener;
 use App\Domains\Complaint\Repositories\ComplaintRepository;
 use App\Domains\Complaint\Repositories\ComplaintRepositoryInterface;
+use App\Domains\Report\Repositories\ReportRepository;
+use App\Domains\Report\Repositories\ReportRepositoryInterface;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 
-class ComplaintServiceProvider extends ServiceProvider
+class ReportServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -21,8 +23,8 @@ class ComplaintServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            ComplaintRepositoryInterface::class,
-            ComplaintRepository::class
+            ReportRepositoryInterface::class,
+            ReportRepository::class
         );
     }
 
@@ -34,16 +36,6 @@ class ComplaintServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
 
         $this->registerRoutes();
-
-        $events = [
-            ComplaintCreated::class,
-            ComplaintReplyCreated::class,
-            ComplaintStatusChanged::class,
-        ];
-
-        foreach ($events as $event) {
-            Event::listen($event, InvalidateComplaintCacheListener::class);
-        }
     }
 
     /**
@@ -51,7 +43,7 @@ class ComplaintServiceProvider extends ServiceProvider
      */
     protected function registerRoutes(): void
     {
-        Route::prefix('api/v1/complaints')
+        Route::prefix('api/v1/reports')
              ->middleware('api')
              ->group(__DIR__.'/Routes/api.php');
     }

@@ -3,6 +3,7 @@
 namespace App\Domains\Complaint\Models;
 
 use App\Domains\Auth\Models\User;
+use App\Domains\Shared\Tracing\Models\Trace;
 use App\Traits\HasUniqueCode;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,6 +28,12 @@ class Complaint extends Model
     public function replies(): HasMany
     {
         return $this->hasMany(ComplaintReply::class);
+    }
+
+    public function traces(): HasMany
+    {
+        return $this->hasMany(Trace::class, 'entity_id')
+            ->where('entity_type', 'Complaint');
     }
     protected function getCodeColumn(): string
     {
