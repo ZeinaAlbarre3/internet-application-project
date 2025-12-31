@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Domains\Report;
+namespace App\Domains\Notification;
 
-use App\Domains\Report\Repositories\ReportRepository;
-use App\Domains\Report\Repositories\ReportRepositoryInterface;
+use App\Domains\Notification\Repositories\NotificationRepository;
+use App\Domains\Notification\Repositories\NotificationRepositoryInterface;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 
-class ReportServiceProvider extends ServiceProvider
+class NotificationServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
@@ -16,8 +16,8 @@ class ReportServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(
-            ReportRepositoryInterface::class,
-            ReportRepository::class
+            NotificationRepositoryInterface::class,
+            NotificationRepository::class
         );
     }
 
@@ -29,6 +29,8 @@ class ReportServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
 
         $this->registerRoutes();
+
+        //Event::listen('*', GenericDatabaseNotification::class);
     }
 
     /**
@@ -36,7 +38,7 @@ class ReportServiceProvider extends ServiceProvider
      */
     protected function registerRoutes(): void
     {
-        Route::prefix('api/v1/reports')
+        Route::prefix('api/v1/notifications')
              ->middleware('api')
              ->group(__DIR__.'/Routes/api.php');
     }

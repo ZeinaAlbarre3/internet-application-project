@@ -3,6 +3,7 @@
 namespace App\Domains\Auth\Models;
 
 use App\Domains\Complaint\Models\Complaint;
+use App\Domains\Complaint\Models\ComplaintHistory;
 use App\Domains\Shared\Tracing\Models\Trace;
 use App\Traits\HasUniqueCode;
 use Database\Factories\UserFactory;
@@ -68,6 +69,11 @@ class User extends Authenticatable
     public function traces(): HasMany
     {
         return $this->hasMany(Trace::class);
+    }
+
+    public function histories(): HasMany
+    {
+        return $this->hasMany(ComplaintHistory::class,'actor_id');
     }
 
     protected function getCodeColumn(): string

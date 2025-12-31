@@ -5,6 +5,7 @@ namespace App\Domains\Complaint\Repositories;
 use App\Domains\Complaint\Data\ChangeStatusData;
 use App\Domains\Complaint\Enum\ComplaintStatusEnum;
 use App\Domains\Complaint\Models\Complaint;
+use App\Domains\Complaint\Models\ComplaintHistory;
 use App\Exceptions\Types\CustomException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
@@ -123,6 +124,18 @@ class ComplaintRepository implements ComplaintRepositoryInterface
         }
 
         return Complaint::find($complaint->id);
+    }
+
+    public function paginateHistory(int $complaintId, $request)
+    {
+        $perPage = $request['per_page'] ?? 16;
+
+        return ComplaintHistory::query()
+            ->where('complaint_id', $complaintId)
+            ->with(['actor'])
+            ->latest('occurred_at')
+            ->paginate($perPage)
+            ->appends($request->query());
     }
 
 }

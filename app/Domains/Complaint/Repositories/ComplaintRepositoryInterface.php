@@ -15,5 +15,7 @@ interface ComplaintRepositoryInterface
     public function markAsRead(Complaint $complaint): Complaint;
     public function assignToStaffAtomic(Complaint $complaint, int $staffId): bool;
     public function assignToStaffWithLock(Complaint $complaint, int $staffId, int $seconds = 10): bool;
+    public function paginateHistory(int $complaintId, $request);
+
 
 }

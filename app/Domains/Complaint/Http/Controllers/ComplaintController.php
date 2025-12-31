@@ -7,8 +7,10 @@ use App\Domains\Complaint\Data\CreateComplaintData;
 use App\Domains\Complaint\Data\ReplyComplaintData;
 use App\Domains\Complaint\Http\Requests\ChangeComplaintStatusRequest;
 use App\Domains\Complaint\Http\Requests\CreateComplaintRequest;
+use App\Domains\Complaint\Http\Requests\LisComplaintHistoryRequest;
 use App\Domains\Complaint\Http\Requests\ListComplaintsRequest;
 use App\Domains\Complaint\Http\Requests\ReplyComplaintRequest;
+use App\Domains\Complaint\Http\Resources\ComplaintHistoryResourceCollection;
 use App\Domains\Complaint\Http\Resources\ComplaintListResourceCollection;
 use App\Domains\Complaint\Http\Resources\ComplaintResource;
 use App\Domains\Complaint\Models\Complaint;
@@ -79,5 +81,12 @@ class ComplaintController extends Controller
         $complaint = $this->complaintService->changeStatusOptimistic($complaint, $data);
 
         return self::Success(new ComplaintResource($complaint), msg: 'Complaint status changed (optimistic)');
+    }
+
+    public function complaintHistory(LisComplaintHistoryRequest $request,Complaint $complaint): JsonResponse
+    {
+        $history = $this->complaintService->getComplaintHistory($request,$complaint);
+
+        return self::Success(data: new ComplaintHistoryResourceCollection($history));
     }
 }

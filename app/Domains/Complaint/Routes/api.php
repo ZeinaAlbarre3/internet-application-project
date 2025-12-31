@@ -17,6 +17,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/{complaint}/reply', [ComplaintController::class, 'reply'])->middleware(['permission:reply-complaint']);
     Route::post('/{complaint}/assign', [ComplaintController::class, 'assignToMe'])->middleware('permission:assign-complaint');
     Route::post('/{complaint}/status/optimistic', [ComplaintController::class, 'changeStatusOptimistic'])->middleware(['permission:change-status-complaint']);
+    Route::get('/{complaint}/history', [ComplaintController::class, 'complaintHistory']);//->middleware(['permission:complaint-history']);
 
 });
 

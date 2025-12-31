@@ -6,6 +6,7 @@ use App\Domains\Complaint\Data\ChangeStatusData;
 use App\Domains\Complaint\Data\CreateComplaintData;
 use App\Domains\Complaint\Data\ReplyComplaintData;
 use App\Domains\Complaint\Enum\ComplaintStatusEnum;
+use App\Domains\Complaint\Events\ComplaintAssigned;
 use App\Domains\Complaint\Events\ComplaintCreated;
 use App\Domains\Complaint\Events\ComplaintReplyCreated;
 use App\Domains\Complaint\Events\ComplaintStatusChanged;
@@ -34,7 +35,7 @@ class ComplaintService
                 'user_id' => Auth::id(),
             ]);
 
-            event(new ComplaintCreated($complaint));
+            DB::afterCommit(fn () => event(new ComplaintCreated($complaint, Auth::id())));
 
             return $complaint;
         });
@@ -50,7 +51,7 @@ class ComplaintService
 
             $complaintReply = $this->complaintRepository->createReply($complaint, $data->toCreateArray($user));
 
-            event(new ComplaintReplyCreated($complaintReply));
+            DB::afterCommit(fn () => event(new ComplaintReplyCreated($complaintReply, Auth::id())));
 
             return $complaint->refresh()->load('replies');
         });
@@ -75,20 +76,23 @@ class ComplaintService
     {
         return DB::transaction(function () use ($complaint) {
 
-            Cache::tags(['complaints'])->flush();
-
             $user = Auth::user();
             $assigned = $this->complaintRepository->assignToStaffAtomic($complaint, $user->id);
 
             if ($assigned) {
+                DB::afterCommit(fn () => event(new ComplaintAssigned($complaint, $user->reference_number, Auth::id())));
+
                 return $complaint->refresh();
             }
 
             $assignedWithLock = $this->complaintRepository->assignToStaffWithLock($complaint, $user->id, 10);
 
             if ($assignedWithLock) {
+                DB::afterCommit(fn () => event(new ComplaintAssigned($complaint, $user->reference_number, Auth::id())));
+
                 return $complaint->refresh();
             }
+
 
             throw new CustomException('Conflict: complaint already assigned', 409);
         });
@@ -102,10 +106,15 @@ class ComplaintService
 
             $complaint = $this->complaintRepository->updateStatusOptimistic($complaint, $data);
 
-            event(new ComplaintStatusChanged($complaint,$oldStatus,$complaint->status));
+            DB::afterCommit(fn () => event(new ComplaintStatusChanged($complaint, $oldStatus, $complaint->status,  Auth::id())));
 
             return $complaint->refresh()->load('replies');
         });
+    }
+
+    public function getComplaintHistory($request,Complaint $complaint)
+    {
+        return $this->complaintRepository->paginateHistory($complaint->id,$request);
     }
 
 }

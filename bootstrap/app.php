@@ -2,6 +2,7 @@
 
 use App\Domains\Auth\AuthServiceProvider;
 use App\Domains\Complaint\ComplaintServiceProvider;
+use App\Domains\Notification\NotificationServiceProvider;
 use App\Domains\Report\ReportServiceProvider;
 use App\Domains\Shared\Tracing\TraceServiceProvider;
 use App\Exceptions\ExceptionHandler;
@@ -31,5 +32,6 @@ return Application::configure(basePath: dirname(__DIR__))
         ComplaintServiceProvider::class,
         TraceServiceProvider::class,
         ReportServiceProvider::class,
+        NotificationServiceProvider::class,
     ])
     ->create([]);
